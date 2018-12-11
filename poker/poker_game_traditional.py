@@ -1,5 +1,5 @@
 from . import ChannelError, MessageFormatError, MessageTimeout, DeckFactory, TraditionalPokerScoreDetector
-from poker_game import PokerGame, GameFactory, EndGameException, GameError, GamePlayers, GameEventDispatcher
+from .poker_game import PokerGame, GameFactory, EndGameException, GameError, GamePlayers, GameEventDispatcher
 import gevent
 import time
 import uuid

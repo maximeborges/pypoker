@@ -179,9 +179,10 @@ class GamePlayers:
         for i in range(len(self._player_ids)):
             next_item = (start_item + (i * step_multiplier)) % len(self._player_ids)
             player_id = self._player_ids[next_item]
+            print(player_id)
             if player_id not in self._folder_ids:
+                print(self._players[player_id])
                 yield self._players[player_id]
-        raise StopIteration
 
     # def rounder(self, start_player_id):
     #     def decorator(action):
@@ -239,7 +240,7 @@ class GamePlayers:
         return len(self._player_ids) - len(self._folder_ids)
 
     def count_active_with_money(self):
-        return len(filter(lambda player: player.money > 0, self.active))
+        return len(list([player for player in self.active if player.money > 0]))
 
     @property
     def all(self):
@@ -294,14 +295,33 @@ class GamePots:
 
     def add_bets(self, bets):
         for player in self._game_players.all:
-            self._bets[player.id] += bets[player.id] if bets.has_key(player.id) else 0.0
+            self._bets[player.id] += bets[player.id] if player.id in bets else 0.0
 
         bets = dict(self._bets)
+
+        def cmp_to_key(mycmp):
+            'Convert a cmp= function into a key= function'
+            class K(object):
+                def __init__(self, obj, *args):
+                    self.obj = obj
+                def __lt__(self, other):
+                    return mycmp(self.obj, other.obj) < 0
+                def __gt__(self, other):
+                    return mycmp(self.obj, other.obj) > 0
+                def __eq__(self, other):
+                    return mycmp(self.obj, other.obj) == 0
+                def __le__(self, other):
+                    return mycmp(self.obj, other.obj) <= 0
+                def __ge__(self, other):
+                    return mycmp(self.obj, other.obj) >= 0
+                def __ne__(self, other):
+                    return mycmp(self.obj, other.obj) != 0
+            return K
 
         # List of players sorted by their bets
         players = sorted(
             self._game_players.all,
-            cmp=lambda player1, player2: cmp(bets[player1.id], bets[player2.id])
+            key=cmp_to_key(lambda player1, player2: bets[player1.id] > bets[player2.id])
         )
 
         self._pots = []
@@ -414,7 +434,7 @@ class GameBetRounder:
         dealer = players_round[0]
 
         for k, player in enumerate(players_round):
-            if not bets.has_key(player.id):
+            if player.id not in bets:
                 bets[player.id] = 0.0
             if bets[player.id] < 0.0 or (k > 0 and bets[player.id] < bets[players_round[k - 1].id]):
                 # Ensuring the bets dictionary makes sense

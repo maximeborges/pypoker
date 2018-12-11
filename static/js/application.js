@@ -554,30 +554,35 @@ PyPoker = {
         };
 
         PyPoker.socket.onmessage = function(message) {
-            var data = JSON.parse(message.data);
+            var reader = new FileReader();
+            reader.onload = () => {
+                var data = JSON.parse(reader.result);
+                console.log(data);
 
-            console.log(data);
-
-            switch (data.message_type) {
-                case 'ping':
-                    PyPoker.socket.send(JSON.stringify({'message_type': 'pong'}));
-                    break;
-                case 'connect':
-                    PyPoker.onConnect(data);
-                    break;
-                case 'disconnect':
-                    PyPoker.onDisconnect(data);
-                    break;
-                case 'room-update':
-                    PyPoker.Room.onRoomUpdate(data);
-                    break;
-                case 'game-update':
-                    PyPoker.Game.onGameUpdate(data);
-                    break;
-                case 'error':
-                    PyPoker.Logger.log(data.error);
-                    break;
-            }
+                switch (data.message_type) {
+                    case 'ping':
+                        PyPoker.socket.send(JSON.stringify({
+                            'message_type': 'pong'
+                        }));
+                        break;
+                    case 'connect':
+                        PyPoker.onConnect(data);
+                        break;
+                    case 'disconnect':
+                        PyPoker.onDisconnect(data);
+                        break;
+                    case 'room-update':
+                        PyPoker.Room.onRoomUpdate(data);
+                        break;
+                    case 'game-update':
+                        PyPoker.Game.onGameUpdate(data);
+                        break;
+                    case 'error':
+                        PyPoker.Logger.log(data.error);
+                        break;
+                }
+            };
+            reader.readAsText(message.data);
         };
 
         $('#cards-change-cmd').click(function() {

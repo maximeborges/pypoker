@@ -6,7 +6,7 @@ import random
 import time
 from poker import Card
 from multiprocessing import Process, Queue, Manager, Value, Lock
-from Queue import Empty
+from queue import Empty
 
 
 class Cards:
@@ -35,7 +35,7 @@ class Cards:
         :return: a list of a list of cards
         """
         return sorted(
-            (cards for cards in self._group_by_ranks().values() if len(cards) == x),
+            (cards for cards in list(self._group_by_ranks().values()) if len(cards) == x),
             key=lambda cards: cards[0].rank,
             reverse=True
         )
@@ -230,7 +230,7 @@ class HoldemPokerScore(Score):
         return strength
 
     def cmp(self, other):
-        return cmp(self.strength, other.strength)
+        return (self.strength > other.strength)-(self.strength < other.strength)
 
 
 class ScoreDetector:
